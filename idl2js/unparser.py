@@ -101,6 +101,14 @@ class Unparser(Visitor[JsAst]):
                 separator=lambda: self.write(', ')
             )
 
+    def visit_array_expression(self, node):
+        with self._parentheses(BRACKET):
+            interleave(
+                iterable=node.elements,
+                func=self.traverse,
+                separator=lambda: self.write(', ')
+            )
+
     def visit_literal(self, node):
         self.write(node.raw)
 

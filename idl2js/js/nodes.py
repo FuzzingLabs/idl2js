@@ -122,7 +122,9 @@ class ExpressionStatement(Ast):
 
 @attr.s
 class ArrayExpression(Ast):
-    ...
+
+    type: str = attr.ib(default='ArrayExpression')
+    elements: List[Any] = attr.ib(factory=list)
 
 
 @attr.s
@@ -149,4 +151,5 @@ Expression = Union[
     MemberExpression,
     CallExpression,
     ObjectExpression,
+    ArrayExpression,
 ]

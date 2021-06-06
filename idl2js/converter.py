@@ -1,3 +1,4 @@
+from random import randint
 from typing import Type
 
 from .js.statements import (
@@ -6,6 +7,8 @@ from .js.statements import (
     create_operation,
     create_dict,
     create_property,
+    create_expression,
+    create_literal,
 )
 from .js.variable import Variable as JsVariable, create_js_variable
 from .visitor import Visitor
@@ -30,10 +33,12 @@ class Converter(Visitor[WebIDLAst]):
         self._builder = builder
 
     def _calculate_node(self, node: WebIDLAst):
+        if getattr(node, 'optional', None) is True and randint(1, 10) < 5:
+            return
+
         dependency, property_ = self._builder.create(node)
 
-        if dependency is not None:
-            self.dependencies.append(dependency)
+        self.dependencies.extend(dependency)
 
         return property_
 
@@ -83,8 +88,9 @@ class InterfaceConverter(Converter):
                     name=self._name,
                     progenitor=self._type,
                     arguments=[
-                        self._calculate_node(node=argument)
+                        item
                         for argument in node.arguments
+                        if (item := self._calculate_node(node=argument)) is not None
                     ],
                 ),
             )
@@ -115,8 +121,9 @@ class InterfaceConverter(Converter):
                     progenitor=self._name,
                     method=node.name,
                     arguments=[
-                        self._calculate_node(node=argument)
+                        item
                         for argument in node.arguments
+                        if (item := self._calculate_node(node=argument)) is not None
                     ],
                 )
             )
@@ -125,9 +132,44 @@ class InterfaceConverter(Converter):
         self.generic_visit(node)
 
 
+class TypeDef(Converter):
+
+    def visit_typedef(self, node) -> None:
+        self.variables.append(
+            create_js_variable(
+                type_=node.name,
+                ast=create_expression(
+                    name=unique_name(),
+                    expression=self._calculate_node(node).elements[0]
+                ),
+            )
+        )
+
+        self.generic_visit(node)
+
+
+class EnumConverter(Converter):
+
+    def visit_enum(self, node):
+        for value in node.values:
+            self.variables.append(
+                create_js_variable(
+                    type_=node.name,
+                    ast=create_expression(
+                        name=unique_name(),
+                        expression=create_literal(value=value.value)
+                    ),
+                )
+            )
+
+        self.generic_visit(node)
+
+
 CONVERTER_MAP: dict[str, Type[Converter]] = {
     'dictionary': DictionaryConverter,
     'interface': InterfaceConverter,
+    'typedef': TypeDef,
+    'enum': EnumConverter,
 }
 
 

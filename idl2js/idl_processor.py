@@ -28,10 +28,6 @@ def parse_idl(file: str) -> ParseResult:
         return ParseResult(error=str(exc))
 
 
-def process_idl(idl_files: tuple[str, ...]) -> list[Ast]:
-    return IDLProcessor(idl_files).process()
-
-
 class IDLProcessor:
 
     def __init__(self, idl_files: tuple[str, ...], process: int = 4):
@@ -53,3 +49,7 @@ class IDLProcessor:
             logger.debug(fail.error)
 
         return [success.item for success in successes]  # type: ignore
+
+
+def process_idl(idl_files: tuple[str, ...]) -> list[Ast]:
+    return IDLProcessor(idl_files).process()

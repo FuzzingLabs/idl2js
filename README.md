@@ -20,7 +20,7 @@ pip install idl2js
 * [original webidl parser](https://github.com/w3c/webidl2.js)
 * [TSJS-lib-generator](https://github.com/microsoft/TSJS-lib-generator/tree/master/inputfiles/idl)
 * [ECMAScript® 2021 Language Specification](https://tc39.es/ecma262/)
-
+* [Web IDL](https://heycam.github.io/webidl)
 
 ## Contributing
 
