@@ -2,7 +2,7 @@
 
 SHELL := /usr/bin/env bash
 
-ANTLR4 := java -jar antlr-4.9.2-complete.jar
+ANTLR4 := java -jar antlr-4.9.3-complete.jar
 PROJECT_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 
