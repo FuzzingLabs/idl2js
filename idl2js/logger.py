@@ -25,6 +25,7 @@ LOGGING_CONFIG = {
             '()': 'idl2js.logger.IDL2JSFormatter',
             'fmt': '%(asctime)s %(levelname)s %(message)s',
             'datefmt': '%H:%M:%S',
+            'use_colors': True,
         },
     },
     'handlers': {
@@ -35,13 +36,13 @@ LOGGING_CONFIG = {
         },
     },
     'loggers': {
-        'idl2js': {'handlers': ['default'], 'level': 'ERROR'},
+        '': {'handlers': ['default'], 'level': 'ERROR'},
+        'idl2js.error': {'level': 'INFO'},
     },
 }
 
 
 class IDL2JSFormatter(logging.Formatter):
-
     level_name_colors = {
         TRACE_LOG_LEVEL: lambda message: click.style(message, fg='blue'),
         logging.DEBUG: lambda message: click.style(message, fg='cyan'),
@@ -51,10 +52,17 @@ class IDL2JSFormatter(logging.Formatter):
         logging.CRITICAL: lambda message: click.style(message, fg='bright_red'),
     }
 
+    def __init__(self, fmt=None, datefmt=None, style='%', use_colors=False):
+        super().__init__(fmt=fmt, datefmt=datefmt, style=style)
+        self.use_colors = use_colors
+
     def formatMessage(self, record):
+        if not self.use_colors:
+            return super().formatMessage(record)
+
         colored = self.level_name_colors[record.levelno]
 
-        record.__dict__['message'] = colored(record.msg % record.args)
+        record.__dict__['message'] = colored(record.msg)
         record.__dict__['asctime'] = colored(f'[+] {record.asctime}')
         record.__dict__['levelname'] = colored(f'{record.levelname}:')
 
@@ -63,5 +71,5 @@ class IDL2JSFormatter(logging.Formatter):
 
 def configure_logging(log_level):
     logging.addLevelName(TRACE_LOG_LEVEL, 'TRACE')
-    logging_dict_config(LOGGING_CONFIG)
-    logging.getLogger('idl2js').setLevel(LOG_LEVELS[log_level])
+    #logging_dict_config(LOGGING_CONFIG)
+    logging.getLogger('').setLevel(LOG_LEVELS[log_level])

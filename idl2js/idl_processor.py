@@ -1,55 +1,36 @@
 import logging
-import multiprocessing
-from typing import Iterator, NamedTuple, Optional
+from pathlib import Path
+from typing import List, Optional, Tuple
 
-from more_itertools import partition
-
-from .error import IDLParseError
-from .webidl import parse, validate
-from .webidl.nodes import Ast
+from error import IDLParseError
+from webidl import parse, validate
+from webidl.nodes import Ast
 
 
 logger = logging.getLogger(__name__)
 
 
-class ParseResult(NamedTuple):
-
-    item: Optional[Ast] = None
-    error: Optional[str] = None
-
-
-def parse_idl(file: str) -> ParseResult:
+def parse_idl(file: str) -> Optional[Ast]:
     try:
-        return ParseResult(item=parse(file))
+        return parse(file)
     except IDLParseError:
-        return ParseResult(error='Skipped {file}\n{errors}'.format(
-            file=file, errors='\n'.join(map(str, validate(file)))))
-    except Exception as exc:
-        return ParseResult(error=str(exc))
-
-
-def process_idl(idl_files: tuple[str, ...]) -> list[Ast]:
-    return IDLProcessor(idl_files).process()
+        errors = '\n'.join(map(str, validate(file)))
+        logger.debug(f'Skipped {file}\n{errors}')
 
 
 class IDLProcessor:
-
-    def __init__(self, idl_files: tuple[str, ...], process: int = 4):
+    def __init__(self, idl_files: Tuple[str, ...]):
         self._idl_files = idl_files
-        self._process = process
 
-    def process(self) -> list[Ast]:
-        return self.parse()
+    def run(self) -> List[Ast]:
+        return list(filter(None, map(parse_idl, self._idl_files)))
 
-    def _parse(self) -> Iterator[ParseResult]:
-        with multiprocessing.Pool(self._process) as pool:
-            yield from pool.imap_unordered(parse_idl, self._idl_files)
 
-    def parse(self) -> list[Ast]:
-        successes, fails = partition(
-            pred=lambda result: result.item is None, iterable=self._parse())
+def main():
+    raw_idl = (Path(__file__).parent / 'idl' / 'std' / 'blob.webidl').resolve()
+    processor = IDLProcessor((str(raw_idl),))
+    print(processor.run())
 
-        for fail in fails:
-            logger.debug(fail.error)
 
-        return [success.item for success in successes]  # type: ignore
+if __name__ == '__main__':
+    main()

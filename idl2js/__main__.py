@@ -1,4 +1,4 @@
-from idl2js import main
+import main
 
 
 if __name__ == '__main__':

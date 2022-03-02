@@ -9,7 +9,8 @@ from antlr4.Parser import ParserRuleContext
 
 from .generated import WebIDLLexer, WebIDLParser
 
-from ..error import IDLParseError
+class IDLParseError(Exception):
+    pass
 
 
 class SyntaxErrorInfo(NamedTuple):
@@ -90,8 +91,8 @@ class Parser:
     def parse(self) -> ParserRuleContext:
         try:
             return self._parser.webIDL()
-        except ParseCancellationException as exc:
-            raise IDLParseError from exc
+        except ParseCancellationException:
+            raise IDLParseError
 
     @_setup_strategy('default')
     def validate(self) -> List[SyntaxErrorInfo]:

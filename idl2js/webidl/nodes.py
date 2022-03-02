@@ -13,8 +13,7 @@ class Ast(abc.ABC):
 
 @attr.s
 class Definition(Ast):
-
-    type: str = attr.ib()
+    ...
 
 
 @attr.s

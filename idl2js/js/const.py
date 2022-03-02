@@ -1,3 +1,2 @@
-LET: str = 'let'
-CONST: str = 'const'
-CATCH_CONSTANT: str = 'e'
+LET = 'let'
+CONST = 'const'

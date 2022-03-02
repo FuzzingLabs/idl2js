@@ -126,21 +126,13 @@ class ArrayExpression(Ast):
 
 
 @attr.s
-class Property(Ast):
-
-    key: Any = attr.ib()
-    value: Any = attr.ib()
-    type: str = attr.ib(default='Property')
-    method: bool = attr.ib(default=False)
-    shorthand: bool = attr.ib(default=False)
-    computed: bool = attr.ib(default=False)
+class ObjectExpression(Ast):
+    ...
 
 
 @attr.s
-class ObjectExpression(Ast):
-
-    type: str = attr.ib(default='ObjectExpression')
-    properties: List[Property] = attr.ib(factory=list)
+class Property(Ast):
+    ...
 
 
 Expression = Union[
@@ -148,5 +140,4 @@ Expression = Union[
     NewExpression,
     MemberExpression,
     CallExpression,
-    ObjectExpression,
 ]
